@@ -44,9 +44,9 @@ def update_products(outdir, startdate='', enddate='', extent=''):
     calc_swi.calculate(outfiles['SWI'], extend_mean=1)
 
     # update SPI stats
-    spi_stats_dir = os.path.join(os.path.dirname(outfiles['TRMM'], 'spi_stats'))
+    spi_stats_dir = os.path.join(os.path.dirname(outfiles['TRMM']), 'spi_stats')
     if not os.path.isdir(spi_stats_dir):
-        save_spi_stats.save(outfiles['TRMM'], statsdir=spi_stats_dir)
+        save_spi_stats.save(outfiles['TRMM'], spi_stats_dir=spi_stats_dir)
 
     # update SPI
     calc_rain.calculate(
