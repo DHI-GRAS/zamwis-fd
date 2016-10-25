@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 def _get_minmax(data):
     return np.min(data), np.max(data)
 
-def _get_scaled_nodata(ds, progress):
+def _get_scaled_nodata(ds):
     # take scale value from first variable that has one
     new_nodata = False
     for varn, datavar in ds.variables.iteritems():
@@ -59,12 +59,12 @@ def main(infile, outdir, fname_fmt='%Y%m%d.tif',
     # get time data
     with netcdf.netcdf_file(infile, 'r') as ds:
         timevar = ds.variables['time']
-        timedata = netcdf_utils.num2date(timevar.data, timevar)
+        timedata = np.atleast_1d(netcdf_utils.num2date(timevar.data, timevar))
 
         # set extent
-        lonlim = _get_minmax(ds.variables['lon'].data)
-        latlim = _get_minmax(ds.variables['lat'].data)
-        extent = '{0[0]},{0[1]},{1[0]},{1[1]}'.format(lonlim, latlim)
+        coordlim = dict(
+            lonlim=_get_minmax(ds.variables['lon'].data),
+            latlim=_get_minmax(ds.variables['lat'].data))
 
         # unscale
         if unscale:
@@ -88,4 +88,4 @@ def main(infile, outdir, fname_fmt='%Y%m%d.tif',
 
         # run gdal_translate with parameters
         logger.info("Time slice {:%Y-%m-%d} to file {}".format(date, fname))
-        gu.translate(infile, outfile, extent=extent, extra=extra)
+        gu.translate(infile, outfile, extra=extra, **coordlim)

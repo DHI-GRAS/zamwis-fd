@@ -8,11 +8,12 @@ fddir = os.path.join(
 sys.path.append(fddir)
 import workflow
 
-logging.basicConfig(format='%(module)s - %(message)s')
+logging.basicConfig(format='%(module)s - %(message)s', level=logging.DEBUG)
 
 kwargs = dict(
         startdate='20160101', enddate='20160131',
         outdir=r'C:\Users\josl\Sample_Data\ZAMWIS',
-        extent='18.3,36.6,-20.5,-8.9')
+        extent='18.3,36.6,-20.5,-8.9',
+        split=True)
 
 workflow.update_products(**kwargs)

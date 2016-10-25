@@ -1,4 +1,6 @@
 import os
+import glob
+import logging
 
 from flooddrought.ingestion import download_ndvi
 from flooddrought.ingestion import download_swi
@@ -13,8 +15,38 @@ from flooddrought.indices import calc_rain
 
 import split_netcdf
 
+logger = logging.getLogger('zamwis.workflow')
 
-def update_products(outdir, startdate='', enddate='', extent=''):
+def _split_to_gtiff(outfiles, splitdir):
+
+    to_split = {
+            'NDVI': [os.path.join('indices', '*_anomaly_????.nc')],
+            'SWI': [os.path.join('indices', '*_deviation_????.nc')],
+            'TRMM': [
+                os.path.join('indices', '*_1_month_????.nc'),
+                os.path.join('indices', '*_3_month_????.nc'),
+                os.path.join('indices', '*_6_month_????.nc')]}
+
+    for product in outfiles:
+        # loop through patterns for each product
+        for pattern in to_split[product]:
+            productdir = os.path.dirname(outfiles[product])
+            fn_pattern = os.path.join(productdir, pattern)
+            infiles = sorted(glob.glob(fn_pattern))
+            if not infiles:
+                logger.warn('No files found for pattern \'{}\'.'.format(fn_pattern))
+                continue
+            # define output dir
+            outdir = os.path.join(splitdir, product, os.path.basename(infiles[0])[:-8])
+            try:
+                os.makedirs(outdir)
+            except OSError:
+                pass
+            # split
+            split_netcdf.main_multifile(infiles, outdir, unscale=True)
+
+
+def update_products(outdir, startdate='', enddate='', extent='', split=False):
 
     commonkw = dict(
             startdate=startdate, enddate=enddate, extent=extent,
@@ -53,17 +85,6 @@ def update_products(outdir, startdate='', enddate='', extent=''):
             spi_stats_dir=spi_stats_dir,
             load_into_memory=True)
 
-    to_split = {
-            'NDVI': [os.path.join('indices', '*_anomaly_????.nc')],
-            'SWI': [os.path.join('indices', '*_deviation_????.nc')],
-            'TRMM': [os.path.join('indices', '_?_month_????.nc')]}
-
-    for product in outfiles:
-        for pattern in to_split[product]:
-            productdir = os.path.dirname(outfiles[product])
-            fn_pattern = os.path.join(productdir, pattern)
-            infiles = sorted(glob.glob(fn_pattern))
-            if not infiles:
-                logger.warn('No files found for pattern \'{}\'.'.format(fn_pattern))
-                continue
-            split_netcdf.split(infiles)
+    if split:
+        splitdir = os.path.join(outdir, 'postgis_export')
+        _split_to_gtiff(outfiles, splitdir=splitdir)
