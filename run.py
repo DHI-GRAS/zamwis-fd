@@ -1,3 +1,12 @@
+import os
+
+fddir = os.path.join(
+        os.path.expanduser('~'), 'Documents', 'GitHub',
+        'F_and_D_Toolbox', 'scripts', 'F_and_D_Toolbox')
+
+import sys
+sys.path.append(fddir)
+
 import workflow
 
 kwargs = dict(
