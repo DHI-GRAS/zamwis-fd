@@ -1,13 +1,14 @@
 import os
+import sys
+import logging
 
 fddir = os.path.join(
         os.path.expanduser('~'), 'Documents', 'GitHub',
         'F_and_D_Toolbox', 'scripts', 'F_and_D_Toolbox')
-
-import sys
 sys.path.append(fddir)
-
 import workflow
+
+logging.basicConfig(format='%(module)s - %(message)s')
 
 kwargs = dict(
         startdate='20160101', enddate='20160131',

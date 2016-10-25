@@ -11,8 +11,7 @@ from flooddrought.indices import calc_swi
 from flooddrought.indices import save_spi_stats
 from flooddrought.indices import calc_rain
 
-from flooddrought.tools import logs as fdlogs
-fdlogs.set_cli_logger()
+import split_netcdf
 
 
 def update_products(outdir, startdate='', enddate='', extent=''):
@@ -53,3 +52,18 @@ def update_products(outdir, startdate='', enddate='', extent=''):
             outfiles['TRMM'],
             spi_stats_dir=spi_stats_dir,
             load_into_memory=True)
+
+    to_split = {
+            'NDVI': [os.path.join('indices', '*_anomaly_????.nc')],
+            'SWI': [os.path.join('indices', '*_deviation_????.nc')],
+            'TRMM': [os.path.join('indices', '_?_month_????.nc')]}
+
+    for product in outfiles:
+        for pattern in to_split[product]:
+            productdir = os.path.dirname(outfiles[product])
+            fn_pattern = os.path.join(productdir, pattern)
+            infiles = sorted(glob.glob(fn_pattern))
+            if not infiles:
+                logger.warn('No files found for pattern \'{}\'.'.format(fn_pattern))
+                continue
+            split_netcdf.split(infiles)
