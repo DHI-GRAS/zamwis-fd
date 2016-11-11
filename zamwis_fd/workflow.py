@@ -20,9 +20,10 @@ logger = logging.getLogger('zamwis.workflow')
 def _split_to_gtiff(outfiles, splitdir):
 
     to_split = {
-            'NDVI': [os.path.join('indices', '*_anomaly_????.nc')],
-            'SWI': [os.path.join('indices', '*_deviation_????.nc')],
+            'NDVI': ['ndvi_????.nc', os.path.join('indices', '*_anomaly_????.nc')],
+            'SWI': ['swi_????.nc', os.path.join('indices', '*_deviation_????.nc')],
             'TRMM': [
+                'trmm_????.nc',
                 os.path.join('indices', '*_1_month_????.nc'),
                 os.path.join('indices', '*_3_month_????.nc'),
                 os.path.join('indices', '*_6_month_????.nc')]}
@@ -63,7 +64,7 @@ def update_products(outdir, startdate='', enddate='', extent='', split=False):
 
     # downloads
     download_ndvi.download(outfiles['NDVI'], product_ID=0, **commonkw)
-    download_swi.download(outfiles['SWI'], product='SWI', **commonkw)
+    download_swi.download(outfiles['SWI'], product='SWI10', **commonkw)
     download_trmm.download(outfiles['TRMM'], **commonkw)
 
     # update long-term stats
