@@ -13,7 +13,7 @@ from flooddrought.indices import calc_swi
 from flooddrought.indices import save_spi_stats
 from flooddrought.indices import calc_rain
 
-import split_netcdf
+from . import split_netcdf
 
 logger = logging.getLogger('zamwis.workflow')
 
