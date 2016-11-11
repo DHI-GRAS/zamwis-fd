@@ -25,14 +25,14 @@ def main(outdir, extent,
 
     if enddate is None:
         enddate = datetime.datetime.now()
-        enddate_str = enddate.strftime('%Y%m%d')
+        enddate = enddate.strftime('%Y%m%d')
 
     if startdate is None:
         startdate = enddate - datetime.timedelta(days=365)
-        startdate_str = startdate.strftime('%Y%m%d')
+        startdate = startdate.strftime('%Y%m%d')
 
     workflow.update_products(outdir=outdir, extent=extent,
-            startdate=startdate_str, enddate=enddate_str, split=split)
+            startdate=startdate, enddate=enddate, split=split)
 
 if __name__ == '__main__':
 
