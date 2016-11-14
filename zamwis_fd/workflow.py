@@ -67,13 +67,16 @@ def update_products(outdir, startdate='', enddate='', extent='', split=False):
     download_swi.download(outfiles['SWI'], product='SWI10', **commonkw)
     download_trmm.download(outfiles['TRMM'], **commonkw)
 
-    # update long-term stats
-    for product in ['NDVI', 'SWI']:
-        update_stats.update(outfiles[product])
+    for product, calc in [('NDVI', calc_ndvi), ('SWI', calc_swi)]:
+        # update long-term stats
+        try:
+            update_stats.update(outfiles[product])
+        except ValueError:
+            logger.warn('No files found for product \'{}\'. Skipping.'.format(product))
+            continue
 
-    # update indices
-    calc_ndvi.calculate(outfiles['NDVI'], extend_mean=1)
-    calc_swi.calculate(outfiles['SWI'], extend_mean=1)
+        # update indices
+        calc.calculate(outfiles[product], extend_mean=1)
 
     # update SPI stats
     spi_stats_dir = os.path.join(os.path.dirname(outfiles['TRMM']), 'spi_stats')
