@@ -29,8 +29,11 @@ def main_multifile(infiles, *args, **kwargs):
     # make sure ncfnames is iterable
     if not isinstance(infiles, list):
         infiles = [infiles]
+    outfiles = []
     for infile in infiles:
-        main(infile, *args, **kwargs)
+        out = main(infile, *args, **kwargs)
+        outfiles += out
+    return outfiles
 
 def main(infile, outdir, fname_fmt='%Y%m%d.tif',
          unscale=False, skip_existing=False):
@@ -61,11 +64,6 @@ def main(infile, outdir, fname_fmt='%Y%m%d.tif',
         timevar = ds.variables['time']
         timedata = np.atleast_1d(netcdf_utils.num2date(timevar.data, timevar))
 
-        # set extent
-        coordlim = dict(
-            lonlim=_get_minmax(ds.variables['lon'].data),
-            latlim=_get_minmax(ds.variables['lat'].data))
-
         # unscale
         if unscale:
             if '-unscale' not in _common_extra:
@@ -76,6 +74,7 @@ def main(infile, outdir, fname_fmt='%Y%m%d.tif',
                 _common_extra += ['-a_nodata', str(new_nodata)]
 
     # export time slices to tif files
+    outfiles = []
     for i, date in enumerate(timedata):
         # set specific parameters
         fname = date.strftime(fname_fmt)
@@ -88,4 +87,6 @@ def main(infile, outdir, fname_fmt='%Y%m%d.tif',
 
         # run gdal_translate with parameters
         logger.info("Time slice {:%Y-%m-%d} to file {}".format(date, fname))
-        gu.translate(infile, outfile, extra=extra, **coordlim)
+        gu.translate(infile, outfile, extra=extra)
+        outfiles.append(outfile)
+    return outfiles

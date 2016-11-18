@@ -1,7 +1,9 @@
 import os
 import re
 import glob
+import shutil
 import logging
+import tempfile
 import datetime
 
 from flooddrought.ingestion import download_ndvi
@@ -16,6 +18,8 @@ from flooddrought.indices import save_spi_stats
 from flooddrought.indices import calc_rain
 
 from . import split_netcdf
+
+from flooddrought.tools import gdal_utils as gu
 
 logger = logging.getLogger('zamwis.workflow')
 
@@ -37,7 +41,7 @@ def filter_ncfiles_year(ncfiles, latest_year):
     return [fname for fname in ncfiles if find_year_in_fname(fname) >= latest_year]
 
 
-def _split_to_gtiff(outfiles, splitdir):
+def _split_to_gtiff(outfiles, splitdir, extents):
 
     to_split = {
             'NDVI': ['ndvi_????.nc', os.path.join('indices', '*_anomaly_????.nc')],
@@ -63,17 +67,25 @@ def _split_to_gtiff(outfiles, splitdir):
                 os.makedirs(outdir)
             except OSError:
                 pass
-            # re-process only latest year of nc files
+            tempdir = tempfile.mkdtemp()
             try:
-                # try sub-setting infiles
-                latest_year = _find_latest_year_splitfiles(outdir)
-                infiles = filter_ncfiles_year(infiles, latest_year)
-            except (AttributeError, TypeError, ValueError) as err:
-                # use full list
-                logger.warn('Splitting all available netCDF data ({}).'.format(str(err)))
-                pass
-            # split
-            split_netcdf.main_multifile(infiles, outdir, unscale=True, fname_fmt='%Y%m%d0000.tif')
+                # re-process only latest year of nc files
+                try:
+                    # try sub-setting infiles
+                    latest_year = _find_latest_year_splitfiles(outdir)
+                    infiles = filter_ncfiles_year(infiles, latest_year)
+                except (AttributeError, TypeError, ValueError) as err:
+                    # use full list
+                    logger.warn('Splitting all available netCDF data ({}).'.format(str(err)))
+                    pass
+                # split
+                tempfiles = split_netcdf.main_multifile(infiles, tempdir, unscale=True, fname_fmt='%Y%m%d0000.tif')
+
+                for fname in tempfiles:
+                    outfile = os.path.join(outdir, os.path.basename(fname))
+                    gu.warp(fname, outfile, r='bilinear', extent=extents[product])
+            finally:
+                shutil.rmtree(tempdir)
 
 
 def update_products(outdir, startdate='', enddate='', split=False):
@@ -84,8 +96,8 @@ def update_products(outdir, startdate='', enddate='', split=False):
 
     extents = {
             'NDVI': '18.35,36.55,-20.5,-8.95',
-            'SWI': '18.35,36.45,-20.35,-8.95',
-            'TRMM': '18.375,36.375,-20.125,-8.875'}
+            'SWI': '18.3,36.5,-20.4,-8.9',
+            'TRMM': '18.25,36.5,-20.25,-8.75'}
 
     outfiles = {}
     for product in ['NDVI', 'SWI', 'TRMM']:
@@ -125,4 +137,4 @@ def update_products(outdir, startdate='', enddate='', split=False):
 
     if split:
         splitdir = os.path.join(outdir, 'postgis_export')
-        _split_to_gtiff(outfiles, splitdir=splitdir)
+        _split_to_gtiff(outfiles, splitdir=splitdir, extents=extents)
