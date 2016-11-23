@@ -36,6 +36,7 @@ def main_multifile(infiles, *args, **kwargs):
     return outfiles
 
 def main(infile, outdir, fname_fmt='%Y%m%d.tif',
+         startdate=None, enddate=None,
          unscale=False, skip_existing=False):
     """Extract all time slices from netCDF file naming them after date
 
@@ -49,6 +50,8 @@ def main(infile, outdir, fname_fmt='%Y%m%d.tif',
         format string for datetime.datetime.strftime()
         that generates the target file name
         e.g. '%Y%m%d.tif' will give '20160101.tif'
+    startdate, enddate : datetime.datetime
+        start and end date
     unscale : bool
         apply GDAL's -unscale option
         and also fix the nodata value
@@ -76,6 +79,10 @@ def main(infile, outdir, fname_fmt='%Y%m%d.tif',
     # export time slices to tif files
     outfiles = []
     for i, date in enumerate(timedata):
+        if ((startdate is not None and date < startdate) or
+                (enddate is not None and date > enddate)):
+            continue
+
         # set specific parameters
         fname = date.strftime(fname_fmt)
         outfile = os.path.join(outdir, fname)

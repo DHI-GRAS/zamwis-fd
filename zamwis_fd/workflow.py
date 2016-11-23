@@ -1,10 +1,8 @@
 import os
-import re
 import glob
 import shutil
 import logging
 import tempfile
-import datetime
 
 from flooddrought.ingestion import download_ndvi
 from flooddrought.ingestion import download_swi
@@ -17,32 +15,18 @@ from flooddrought.indices import calc_swi
 from flooddrought.indices import save_spi_stats
 from flooddrought.indices import calc_rain
 
-from . import split_netcdf
-
+from flooddrought.tools import utils as fdutils
 from flooddrought.tools import gdal_utils as gu
+
+from . import split_netcdf
 
 logger = logging.getLogger('zamwis.workflow')
 
 
-def _find_latest_year_splitfiles(outdir):
-    pattern = os.path.join(outdir, '*.tif')
-    tiffiles = sorted(glob.glob(pattern))
-    if not tiffiles:
-        raise ValueError('No existing tif files found.')
-    else:
-        return datetime.datetime.strptime(os.path.basename(tiffiles[-1])[:8], '%Y%m%d').year
-
-
-def find_year_in_fname(fname):
-    return int(re.match(r'(.*_)(\d{4})(\.nc)', os.path.basename(fname)).group(2))
-
-
-def filter_ncfiles_year(ncfiles, latest_year):
-    return [fname for fname in ncfiles if find_year_in_fname(fname) >= latest_year]
-
-
-def _split_to_gtiff(outfiles, splitdir, extents):
-
+def _split_to_gtiff(outfiles, splitdir, extents,
+        firstyear=None, lastyear=None):
+    """Help function for GeoTIFF export"""
+    # define file patterns
     to_split = {
             'NDVI': ['ndvi_????.nc', os.path.join('indices', '*_anomaly_????.nc')],
             'SWI': ['swi_????.nc', os.path.join('indices', '*_deviation_????.nc')],
@@ -52,6 +36,7 @@ def _split_to_gtiff(outfiles, splitdir, extents):
                 os.path.join('indices', '*_3_month_????.nc'),
                 os.path.join('indices', '*_6_month_????.nc')]}
 
+    # loop through products
     for product in outfiles:
         # loop through patterns for each product
         for pattern in to_split[product]:
@@ -72,8 +57,7 @@ def _split_to_gtiff(outfiles, splitdir, extents):
                 # re-process only latest year of nc files
                 try:
                     # try sub-setting infiles
-                    latest_year = _find_latest_year_splitfiles(outdir)
-                    infiles = filter_ncfiles_year(infiles, latest_year)
+                    infiles = fdutils.filter_yearly_files(infiles, firstyear, lastyear)
                 except (AttributeError, TypeError, ValueError) as err:
                     # use full list
                     logger.warn('Splitting all available netCDF data ({}).'.format(str(err)))
@@ -81,6 +65,7 @@ def _split_to_gtiff(outfiles, splitdir, extents):
                 # split
                 tempfiles = split_netcdf.main_multifile(infiles, tempdir, unscale=True, fname_fmt='%Y%m%d0000.tif')
 
+                # make sure that the extent perfectly matches requested
                 for fname in tempfiles:
                     outfile = os.path.join(outdir, os.path.basename(fname))
                     gu.warp(fname, outfile, r='bilinear', extent=extents[product])
@@ -89,7 +74,17 @@ def _split_to_gtiff(outfiles, splitdir, extents):
 
 
 def update_products(outdir, startdate='', enddate='', split=False):
+    """Update data products
 
+    Parameters
+    ----------
+    outdir : str
+        path to output directory
+    startdate, enddate : str YYYYMMDD
+        date range for download and GeoTIFF export
+    split : bool
+        whether to export the data as single-date GeoTIFF
+    """
     commonkw = dict(
             startdate=startdate, enddate=enddate,
             split_yearly=True)
@@ -135,6 +130,10 @@ def update_products(outdir, startdate='', enddate='', split=False):
             spi_stats_dir=spi_stats_dir,
             load_into_memory=True)
 
+    # export to GeoTIFF
     if split:
+        firstyear = int(startdate[:4]) if startdate else None
+        lastyear = int(enddate[:4]) if enddate else None
         splitdir = os.path.join(outdir, 'postgis_export')
-        _split_to_gtiff(outfiles, splitdir=splitdir, extents=extents)
+        _split_to_gtiff(outfiles, splitdir=splitdir, extents=extents,
+                firstyear=firstyear, lastyear=lastyear)
