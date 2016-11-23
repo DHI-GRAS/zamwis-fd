@@ -106,7 +106,7 @@ def update_products(outdir, startdate='', enddate='', split=False):
             os.mkdir(product_outdir)
         except OSError:
             pass
-        outfiles[product] = os.path.join(product_outdir, (product.lower() + '.nc'))
+        outfiles[product] = os.path.join(product_outdir, (product.upper() + '.nc'))
 
     # downloads
     download_ndvi.download(outfiles['NDVI'], product_ID=0, extent=extents['NDVI'], **commonkw)
