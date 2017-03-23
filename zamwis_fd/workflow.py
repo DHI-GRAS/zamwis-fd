@@ -111,7 +111,7 @@ def update_products(outdir, startdate='', enddate='', split=False):
     for product, calc in [('NDVI', calc_ndvi), ('SWI', calc_swi)]:
         # update long-term stats
         try:
-            update_stats.update(outfiles[product])
+            update_stats.update(outfiles[product], monthly_stats=False)
         except ValueError:
             logger.warn('No files found for product \'{}\'. Skipping.'.format(product))
             continue
