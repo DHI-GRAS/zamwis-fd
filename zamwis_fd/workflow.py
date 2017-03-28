@@ -73,7 +73,8 @@ def _split_to_gtiff(outfiles, splitdir, extents,
                 shutil.rmtree(tempdir)
 
 
-def update_products(outdir, startdate='', enddate='', split=False):
+def update_products(outdir, startdate='', enddate='',
+        download=True, update_longterm_stats=True, split=False):
     """Update data products
 
     Parameters
@@ -82,6 +83,10 @@ def update_products(outdir, startdate='', enddate='', split=False):
         path to output directory
     startdate, enddate : str YYYYMMDD
         date range for download and GeoTIFF export
+    download : bool
+        do download
+    update_longterm_stats : bool
+        update longterm statistics
     split : bool
         whether to export the data as single-date GeoTIFF
     """
@@ -104,27 +109,32 @@ def update_products(outdir, startdate='', enddate='', split=False):
         outfiles[product] = os.path.join(product_outdir, (product.upper() + '.nc'))
 
     # downloads
-    download_ndvi.download(outfiles['NDVI'], product_ID=0, extent=extents['NDVI'], **commonkw)
-    download_swi.download(outfiles['SWI'], product='SWI10', extent=extents['SWI'], **commonkw)
-    download_trmm.download(outfiles['TRMM'], extent=extents['TRMM'], **commonkw)
+    if download:
+        download_ndvi.download(outfiles['NDVI'], product_ID=0, extent=extents['NDVI'], **commonkw)
+        download_swi.download(outfiles['SWI'], product='SWI10', extent=extents['SWI'], **commonkw)
+        download_trmm.download(outfiles['TRMM'], extent=extents['TRMM'], **commonkw)
 
     for product, calc in [('NDVI', calc_ndvi), ('SWI', calc_swi)]:
-        # update long-term stats
-        try:
-            update_stats.update(outfiles[product], monthly_stats=False)
-        except ValueError:
-            logger.warn('No files found for product \'{}\'. Skipping.'.format(product))
-            continue
+        if update_longterm_stats:
+            # update long-term stats
+            try:
+                update_stats.update(outfiles[product], monthly_stats=False)
+            except ValueError:
+                logger.warn('No files found for product \'{}\'. Skipping.'.format(product))
+                continue
 
         # update indices
+        logger.info('Calculating indices for product {}'.format(product))
         calc.calculate(outfiles[product], extend_mean=1)
 
     # update SPI stats
+    logger.info('Update SPI stats')
     spi_stats_dir = os.path.join(os.path.dirname(outfiles['TRMM']), 'spi_stats')
     if not os.path.isdir(spi_stats_dir):
         save_spi_stats.save(outfiles['TRMM'], spi_stats_dir=spi_stats_dir)
 
     # update SPI
+    logger.info('Calculate SPI')
     calc_rain.calculate(
             outfiles['TRMM'],
             spi_stats_dir=spi_stats_dir,
@@ -132,6 +142,7 @@ def update_products(outdir, startdate='', enddate='', split=False):
 
     # export to GeoTIFF
     if split:
+        logger.info('Splitting into GeoTIFF')
         firstyear = int(startdate[:4]) if startdate else None
         lastyear = int(enddate[:4]) if enddate else None
         splitdir = os.path.join(outdir, 'postgis_export')
