@@ -12,8 +12,8 @@ logging.basicConfig(format='%(module)s - %(message)s', level=logging.INFO)
 @click.option('--enddate', help='Download query end date YYYYMMDD (default: today)')
 @click.option('--download/--no-download', default=True, help='Attempt to download new files (default: True)')
 @click.option('--update-longterm-stats/--no-update-longterm-stats', default=True, help='Update longterm statistics (default: True)')
-@click.option('--split/--nosplit', default=True, help='Split downloaded data into GeoTIFF for PostGIS import (default: True)')
-def main(outdir, startdate=None, enddate=None, split=True):
+@click.option('--split/--no-split', default=True, help='Split downloaded data into GeoTIFF for PostGIS import (default: True)')
+def main(startdate, enddate, **kwargs):
     """Download and process NDVI, SWI10, and TRMM for ZAMWIS database"""
 
     if enddate is None:
@@ -23,7 +23,8 @@ def main(outdir, startdate=None, enddate=None, split=True):
         startdate = datetime.datetime.strptime(enddate, '%Y%m%d') - datetime.timedelta(days=365)
         startdate = startdate.strftime('%Y%m%d')
 
-    workflow.update_products(outdir=outdir, startdate=startdate, enddate=enddate, split=split)
+    workflow.update_products(startdate=startdate, enddate=enddate, **kwargs)
+
 
 if __name__ == '__main__':
 
