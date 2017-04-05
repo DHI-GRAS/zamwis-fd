@@ -137,8 +137,7 @@ def update_products(outdir, startdate='', enddate='',
     logger.info('Calculate SPI')
     calc_rain.calculate(
             outfiles['TRMM'],
-            spi_stats_dir=spi_stats_dir,
-            load_into_memory=True)
+            spi_stats_dir=spi_stats_dir)
 
     # export to GeoTIFF
     if split:
