@@ -6,7 +6,7 @@ This is a wrapper for a number of Floods and Droughts tools that downloads NDVI,
 
 ### Installation
 
-The package and its dependencies are best installed via the Anaconda Python distribution. Please see instructions on how to install Anaconda on the (Floods and Droughts Toolbox README)[https://github.com/DHI-GRAS/F_and_D_toolbox]. 
+The package and its dependencies are best installed via the Anaconda Python distribution. Please see instructions on how to install Anaconda on the [Floods and Droughts Toolbox README](https://github.com/DHI-GRAS/F_and_D_toolbox).
 
 The Floods and Droughts Python package [`flooddrought`](https://github.com/DHI-GRAS/F_and_D_toolbox) must be installed or available in the Python path.
 
