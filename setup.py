@@ -10,7 +10,7 @@ setup(
     include_package_data=True,
     entry_points="""
     [console_scripts]
-    zamwis_fd=zamwis_fd.run:main
+    zamwis_fd=zamwis_fd.scripts.cli:main
     """,
     install_requires=[
         'click',

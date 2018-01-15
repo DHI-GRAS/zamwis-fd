@@ -1,15 +1,13 @@
 import os.path
 import logging
 import numpy as np
+
 from scipy.io import netcdf
 
-from graspy import gdal_utils as gu
-import netcdf_utils
+from zamwis_fd import netcdf_utils
 
 logger = logging.getLogger(__name__)
 
-def _get_minmax(data):
-    return np.min(data), np.max(data)
 
 def _get_scaled_nodata(ds):
     # take scale value from first variable that has one
@@ -17,12 +15,13 @@ def _get_scaled_nodata(ds):
     for varn, datavar in ds.variables.iteritems():
         try:
             new_nodata = datavar._FillValue * datavar.scale_factor
-            logger.info('Using scale_factor '
-                    'from variable \'{}\''.format(varn))
+            logger.info(
+                'Using scale_factor from variable \'{}\''.format(varn))
             break
         except AttributeError:
             continue
     return new_nodata
+
 
 def main_multifile(infiles, *args, **kwargs):
     "Multi-file wrapper for main function"
@@ -34,6 +33,7 @@ def main_multifile(infiles, *args, **kwargs):
         out = main(infile, *args, **kwargs)
         outfiles += out
     return outfiles
+
 
 def main(infile, outdir, fname_fmt='%Y%m%d.tif',
          startdate=None, enddate=None,

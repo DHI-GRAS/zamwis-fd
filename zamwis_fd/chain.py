@@ -20,11 +20,15 @@ from flooddrought.tools import gdal_utils as gu
 
 from . import split_netcdf
 
-logger = logging.getLogger('zamwis.workflow')
+logger = logging.getLogger(__name__)
+
+EXTENTS = {
+    'NDVI': '18.35,36.55,-20.5,-8.95',
+    'SWI': '18.3,36.5,-20.4,-8.9',
+    'TRMM': '18.25,36.5,-20.25,-8.75'}
 
 
-def _split_to_gtiff(outfiles, splitdir, extents,
-        firstyear=None, lastyear=None):
+def _split_to_gtiff(outfiles, splitdir, extents, firstyear=None, lastyear=None):
     """Help function for GeoTIFF export"""
     # define file patterns
     to_split = {
@@ -63,7 +67,8 @@ def _split_to_gtiff(outfiles, splitdir, extents,
                     logger.warn('Splitting all available netCDF data ({}).'.format(str(err)))
                     pass
                 # split
-                tempfiles = split_netcdf.main_multifile(infiles, tempdir, unscale=True, fname_fmt='%Y%m%d0000.tif')
+                tempfiles = split_netcdf.main_multifile(
+                    infiles, tempdir, unscale=True, fname_fmt='%Y%m%d0000.tif')
 
                 # make sure that the extent perfectly matches requested
                 for fname in tempfiles:
@@ -73,7 +78,8 @@ def _split_to_gtiff(outfiles, splitdir, extents,
                 shutil.rmtree(tempdir)
 
 
-def update_products(outdir, startdate='', enddate='',
+def update_products(
+        outdir, startdate=None, enddate=None,
         download=True, update_longterm_stats=True, split=False):
     """Update data products
 
@@ -94,11 +100,6 @@ def update_products(outdir, startdate='', enddate='',
             startdate=startdate, enddate=enddate,
             split_yearly=True)
 
-    extents = {
-            'NDVI': '18.35,36.55,-20.5,-8.95',
-            'SWI': '18.3,36.5,-20.4,-8.9',
-            'TRMM': '18.25,36.5,-20.25,-8.75'}
-
     outfiles = {}
     for product in ['NDVI', 'SWI', 'TRMM']:
         product_outdir = os.path.join(outdir, product)
@@ -110,9 +111,9 @@ def update_products(outdir, startdate='', enddate='',
 
     # downloads
     if download:
-        download_ndvi.download(outfiles['NDVI'], product_ID=0, extent=extents['NDVI'], **commonkw)
-        download_swi.download(outfiles['SWI'], product='SWI10', extent=extents['SWI'], **commonkw)
-        download_trmm.download(outfiles['TRMM'], extent=extents['TRMM'], **commonkw)
+        download_ndvi.download(outfiles['NDVI'], product_ID=0, extent=EXTENTS['NDVI'], **commonkw)
+        download_swi.download(outfiles['SWI'], product='SWI10', extent=EXTENTS['SWI'], **commonkw)
+        download_trmm.download(outfiles['TRMM'], extent=EXTENTS['TRMM'], **commonkw)
 
     for product, calc in [('NDVI', calc_ndvi), ('SWI', calc_swi)]:
         if update_longterm_stats:
@@ -136,8 +137,8 @@ def update_products(outdir, startdate='', enddate='',
     # update SPI
     logger.info('Calculate SPI')
     calc_rain.calculate(
-            outfiles['TRMM'],
-            spi_stats_dir=spi_stats_dir)
+        outfiles['TRMM'],
+        spi_stats_dir=spi_stats_dir)
 
     # export to GeoTIFF
     if split:
@@ -145,5 +146,6 @@ def update_products(outdir, startdate='', enddate='',
         firstyear = int(startdate[:4]) if startdate else None
         lastyear = int(enddate[:4]) if enddate else None
         splitdir = os.path.join(outdir, 'postgis_export')
-        _split_to_gtiff(outfiles, splitdir=splitdir, extents=extents,
-                firstyear=firstyear, lastyear=lastyear)
+        _split_to_gtiff(
+            outfiles, splitdir=splitdir, extents=EXTENTS,
+            firstyear=firstyear, lastyear=lastyear)
