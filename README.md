@@ -10,8 +10,6 @@ The package and its dependencies are best installed via the Anaconda Python dist
 
 The Floods and Droughts Python package [`flooddrought`](https://github.com/DHI-GRAS/F_and_D_toolbox) must be installed or available in the Python path.
 
-[`graspy`](https://github.com/DHI-GRAS/graspy) must be installed.
-
 Then run `install_or_update.bat` (which runs `python setup.py install`).
 
 
