@@ -1,8 +1,6 @@
 SETLOCAL ENABLEEXTENSIONS
 SET PARENT=%~dp0
-SET PARENT=C:\Sample_Data\ZAMWIS_download
 
-REM Extents make the downloaded files match those in the database
 set NDVI_EXTENT="18.375,36.55,-20.525,-8.975"
 set SWI_EXTENT="18.3,36.5,-20.4,-8.9"
 set TRMM_EXTENT="18.375,36.5,-20.25,-8.875"
@@ -38,7 +36,7 @@ call flooddrought save_timeslice_geotiff %SWI_FILE% %EXPORT_DIR_SWI%
 call flooddrought save_timeslice_geotiff %SWI_DIR%\indices\*deviation*.nc %EXPORT_DIR_SWI%\deviation
 
 call flooddrought download_trmm --extent %TRMM_EXTENT% %TRMM_FILE% %DOWNLOAD_START% %DOWNLOAD_END% --no-delete
-REM call flooddrought save_spi_stats %TRMM_FILE%
+call flooddrought save_spi_stats %TRMM_FILE%
 call flooddrought calculate_rainfall_indices %TRMM_FILE%
 call flooddrought save_timeslice_geotiff %TRMM_FILE% %EXPORT_DIR_TRMM%
 call flooddrought save_timeslice_geotiff %TRMM_DIR%\indices\*_1_month*.nc %EXPORT_DIR_TRMM%\1_month
