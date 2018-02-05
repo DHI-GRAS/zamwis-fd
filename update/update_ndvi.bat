@@ -1,17 +1,15 @@
-SETLOCAL ENABLEEXTENSIONS
-SET PARENT=%~dp0
+setlocal enableextensions
 
-set NDVI_EXTENT="18.375,36.55,-20.525,-8.975"
+if not defined NDVI_DIR (exit /b -1)
+if not defined EXPORT_DIR_NDVI (exit /b -1)
 
-REM set DOWNLOAD_START="--startdate=20160101"
-REM set DOWNLOAD_END="--enddate=20160201"
-REM set NO_DELETE="--no-delete"
+setlocal "NDVI_FILE=%NDVI_DIR%\NDVI.nc"
 
-set "NDVI_DIR=%PARENT%\NDVI"
-set "NDVI_FILE=%NDVI_DIR%\NDVI.nc"
+setlocal NDVI_EXTENT="18.375,36.55,-20.525,-8.975"
 
-set "EXPORT_DIR=%PARENT%\export"
-set "EXPORT_DIR_NDVI=%EXPORT_DIR%\NDVI"
+REM setlocal DOWNLOAD_START="--startdate=20160101"
+REM setlocal DOWNLOAD_END="--enddate=20160201"
+REM setlocal NO_DELETE="--no-delete"
 
 call activate fd
 
@@ -20,5 +18,3 @@ call flooddrought update_longterm_statistics %NDVI_FILE%
 call flooddrought calculate_ndvi_indices %NDVI_FILE%
 call flooddrought save_timeslice_geotiff %NDVI_FILE% %EXPORT_DIR_NDVI%
 call flooddrought save_timeslice_geotiff %NDVI_DIR%\indices\*anomaly*.nc %EXPORT_DIR_NDVI%\anomaly
-
-pause
