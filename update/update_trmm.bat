@@ -20,3 +20,5 @@ call flooddrought save_timeslice_geotiff %TRMM_FILE% %EXPORT_DIR_TRMM%
 call flooddrought save_timeslice_geotiff %TRMM_DIR%\indices\*_1_month*.nc %EXPORT_DIR_TRMM%\1_month
 call flooddrought save_timeslice_geotiff %TRMM_DIR%\indices\*_3_month*.nc %EXPORT_DIR_TRMM%\3_month
 call flooddrought save_timeslice_geotiff %TRMM_DIR%\indices\*_6_month*.nc %EXPORT_DIR_TRMM%\6_month
+
+endlocal

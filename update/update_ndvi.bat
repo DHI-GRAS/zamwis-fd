@@ -18,3 +18,5 @@ call flooddrought update_longterm_statistics %NDVI_FILE%
 call flooddrought calculate_ndvi_indices %NDVI_FILE%
 call flooddrought save_timeslice_geotiff %NDVI_FILE% %EXPORT_DIR_NDVI%
 call flooddrought save_timeslice_geotiff %NDVI_DIR%\indices\*anomaly*.nc %EXPORT_DIR_NDVI%\anomaly
+
+endlocal
