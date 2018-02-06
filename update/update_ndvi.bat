@@ -3,13 +3,13 @@ setlocal enableextensions
 if not defined NDVI_DIR (exit /b -1)
 if not defined EXPORT_DIR_NDVI (exit /b -1)
 
-setlocal "NDVI_FILE=%NDVI_DIR%\NDVI.nc"
+set "NDVI_FILE=%NDVI_DIR%\NDVI.nc"
 
-setlocal NDVI_EXTENT="18.375,36.55,-20.525,-8.975"
+set NDVI_EXTENT="18.375,36.55,-20.525,-8.975"
 
-REM setlocal DOWNLOAD_START="--startdate=20160101"
-REM setlocal DOWNLOAD_END="--enddate=20160201"
-REM setlocal NO_DELETE="--no-delete"
+REM set DOWNLOAD_START="--startdate=20160101"
+REM set DOWNLOAD_END="--enddate=20160201"
+REM set NO_DELETE="--no-delete"
 
 call activate fd
 

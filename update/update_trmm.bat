@@ -3,13 +3,13 @@ setlocal enableextensions
 if not defined TRMM_DIR (exit /b -1)
 if not defined EXPORT_DIR_TRMM (exit /b -1)
 
-setlocal "TRMM_FILE=%TRMM_DIR%\TRMM.nc"
+set "TRMM_FILE=%TRMM_DIR%\TRMM.nc"
 
-setlocal TRMM_EXTENT="18.375,36.5,-20.25,-8.875"
+set TRMM_EXTENT="18.375,36.5,-20.25,-8.875"
 
-REM setlocal DOWNLOAD_START="--startdate=20160101"
-REM setlocal DOWNLOAD_END="--enddate=20160201"
-REM setlocal NO_DELETE="--no-delete"
+REM set DOWNLOAD_START="--startdate=20160101"
+REM set DOWNLOAD_END="--enddate=20160201"
+REM set NO_DELETE="--no-delete"
 
 call activate fd
 

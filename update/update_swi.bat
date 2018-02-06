@@ -3,13 +3,13 @@ setlocal enableextensions
 if not defined SWI_DIR (exit /b -1)
 if not defined EXPORT_DIR_SWI (exit /b -1)
 
-setlocal "SWI_FILE=%SWI_DIR%\SWI.nc"
+set "SWI_FILE=%SWI_DIR%\SWI.nc"
 
-setlocal SWI_EXTENT="18.3,36.5,-20.4,-8.9"
+set SWI_EXTENT="18.3,36.5,-20.4,-8.9"
 
-REM setlocal DOWNLOAD_START="--startdate=20160101"
-REM setlocal DOWNLOAD_END="--enddate=20160201"
-REM setlocal NO_DELETE="--no-delete"
+REM set DOWNLOAD_START="--startdate=20160101"
+REM set DOWNLOAD_END="--enddate=20160201"
+REM set NO_DELETE="--no-delete"
 
 call activate fd
 
