@@ -9,7 +9,7 @@ set SWI_EXTENT="18.3,36.5,-20.4,-8.9"
 
 REM set DOWNLOAD_START="--startdate=20160101"
 REM set DOWNLOAD_END="--enddate=20160201"
-set NO_DELETE="--no-delete"
+REM set NO_DELETE="--no-delete"
 
 call activate fd
 
