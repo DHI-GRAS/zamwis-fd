@@ -4,4 +4,4 @@ set "EXPORT_DIR=%DATA_DIR%\export"
 set "NDVI_DIR=%DATA_DIR%\NDVI"
 set "EXPORT_DIR_NDVI=%EXPORT_DIR%\NDVI"
 
-call update\update_ndvi.bat && call import\import_ndvi.bat
+call %~dp0\update\update_ndvi.bat && call %~dp0\import\import_ndvi.bat
