@@ -16,6 +16,7 @@ call activate fd
 call flooddrought download_trmm --extent %TRMM_EXTENT% %TRMM_FILE% %DOWNLOAD_START% %DOWNLOAD_END% %NO_DELETE%
 call flooddrought save_spi_stats %TRMM_FILE%
 call flooddrought calculate_rainfall_indices %TRMM_FILE%
+
 call flooddrought save_timeslice_geotiff %TRMM_FILE% %EXPORT_DIR_TRMM%
 call flooddrought save_timeslice_geotiff %TRMM_DIR%\indices\*_1_month*.nc %EXPORT_DIR_TRMM%\1_month
 call flooddrought save_timeslice_geotiff %TRMM_DIR%\indices\*_3_month*.nc %EXPORT_DIR_TRMM%\3_month
